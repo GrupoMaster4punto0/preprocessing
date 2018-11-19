@@ -1,0 +1,122 @@
+---
+output:
+  pdf_document: default
+  word_document: default
+---
+#install.packages("rmarkdown")
+#library("rmarkdown")
+
+READING CREDSCO.CSV. NOTE: Change the path of the file for the proper one in your computer. 
+
+Remember that subfolders must be indicated by "/" and not by "\"
+
+Here you can write the introduction of your report and include some text that will be transferred to the word file every time you re-run this Markdown
+
+WARNING: data must have been properly declared before (factors, dates...)
+```{r}
+#setwd("D:/karina/docencia/areferenciesPPT/0DadesPractiques/CREDSCO/")
+#dd <- read.table("D:/karina/docencia/areferenciesPPT/0DadesPractiques/CREDSCO/credscoCategoriques.csv",header=T, sep=";", dec=",")
+#dataset<-"credsco"
+
+setwd("C:/Users/Paula/Downloads/")
+dd<- read.csv("LFB Incident data - LBB.csv",quote = "", header=T, sep=",", dec=".", na.strings="*");
+dataset<-"planta"
+#cit <- read.csv("citations.CSV", quote = "", 
+#                 row.names = NULL, 
+#                 stringsAsFactors = FALSE)
+```
+
+Set the folder where the word file is going to be generated
+```{r}
+#setwd("D:/karina/docencia/areferenciesPPT/7a.DescriptivaBasica/practicaR/outputs/prova")
+
+setwd("C:/Users/Paula/Documents")
+```  
+
+Check the type of the R object created for the dataset
+
+```{r}            
+class(dd)
+```
+
+without including the R instruction in the final document
+
+```{r, echo=FALSE}            
+class(dd)
+```
+
+Get dimensions of the dataset
+````{r}
+dim(dd)
+n<-dim(dd)[1]
+K<-dim(dd)[2]
+
+n
+K
+```
+Check the variables 
+
+```{r}
+names(dd)
+```
+Decide if you need to declare some more factor or date
+
+```{r}
+actives<-c(1:K)
+if (dataset=="planta")
+  {dd[,2]<-as.Date(dd[,2], format="%d/%m/%y")
+   actives<-c(2:44)
+   }
+```
+
+
+Basic descriptive analysis for numerical variables
+
+(decide the maximum number of colors you can need in a graph based on your metadata file)
+```{r, echo=FALSE}
+listOfColors<-rainbow(39)
+
+par(ask=TRUE)
+
+for(k in actives){
+  print(paste("variable ", k, ":", names(dd)[k] ))
+  if (!(is.numeric(dd[,k]) || class(dd[,k])=="Date")){ 
+    frecs<-table(as.factor(dd[,k]), useNA="ifany")
+    proportions<-frecs/n
+    #ojo, decidir si calcular porcentages con o sin missing values
+    pie(frecs, cex=0.6, main=paste("Pie of", names(dd)[k]))
+    barplot(frecs, las=3, cex.names=0.7, main=paste("Barplot of", names(dd)[k]), col=listOfColors)
+    print(paste("Number of modalities: ", length(frecs)))
+    print("Frequency table")
+    print(frecs)
+    print("Relative frequency table (proportions)")
+    print(proportions)
+    print("Frequency table sorted")
+    print(sort(frecs, decreasing=TRUE))
+    print("Relative frequency table (proportions) sorted")
+    print(sort(proportions, decreasing=TRUE))
+   }else{
+     if(class(dd[,k])=="Date"){
+       print(summary(dd[,k]))
+       print(sd(dd[,k]))
+       #decide breaks: weeks, months, quarters...
+       hist(dd[,k],breaks="weeks")
+     }else{
+       hist(dd[,k], main=paste("Histogram of", names(dd)[k]))
+       boxplot(dd[,k], horizontal=TRUE, main=paste("Boxplot of", names    (dd)[k]))
+       print("Extended Summary Statistics")
+       print(summary(dd[,k]))
+       print(paste("sd: ", sd(dd[,k], na.rm=TRUE)))
+       print(paste("vc: ", sd(dd[,k], na.rm=TRUE)/mean(dd[,k], na.rm=TRUE)))
+      }
+   }
+}
+par(ask=FALSE)
+
+#per exportar figures d'R per programa
+#dev.off()
+#png(file=mypath,width = 950, height = 800, units = "px")
+#dev.off()
+
+```
+
